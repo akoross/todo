@@ -1,0 +1,8 @@
+.item-add-form {
+   padding-top: 20px;
+   text-align: right;
+}
+.item-add-form .btn {
+   min-width: max-content;
+   margin-left: 3px;
+}
