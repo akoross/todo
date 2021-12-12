@@ -1,132 +1,88 @@
-import React, { Component } from "react";
+import React, { useState } from 'react';
 
-import AppHeader from "../app-header";
-import SearchPanel from "../search-panel";
-import ItemStatusFilter from "../item-status-filter";
-import TodoList from "../todo-list";
-import ItemAddForm from "../item-add-form";
+import AppHeader from '../app-header';
+import SearchPanel from '../search-panel';
+import ItemStatusFilter from '../item-status-filter';
+import TodoList from '../todo-list';
+import ItemAddForm from '../item-add-form';
+//134
+const App = () => {
+  const [todoData, setTodoData] = useState([]);
+  const [term, setTerm] = useState('');
+  const [filter, setFilter] = useState('all');
 
-export default class App extends Component {
-   maxId = 100;
+  const createTodoItem = (label) => {
+    return {
+      label,
+      important: false,
+      done: false,
+      id: Date.now(),
+    };
+  };
 
-   state = {
-      todoData: [
-         this.createTodoItem("Drink Coffee"),
-         this.createTodoItem("Make Awesome App"),
-         this.createTodoItem("Have a lunch"),
-      ],
-      term: "",
-      filter: "all",
-   };
+  const toggleProperty = (arr, id, propName) => {
+    const idx = arr.findIndex((el) => el.id === id);
+    const oldItem = arr[idx];
+    const newItem = { ...oldItem, [propName]: !oldItem[propName] };
+    return [...arr.slice(0, idx), newItem, ...arr.slice(idx + 1)];
+  };
 
-   createTodoItem(label) {
-      return {
-         label,
-         important: false,
-         done: false,
-         id: this.maxId++,
-      };
-   }
+  const doneItem = (id) =>
+    setTodoData((prev) => toggleProperty(prev, id, 'done'));
 
-   toggleProperty = (arr, id, propName) => {
-      const idx = arr.findIndex((el) => el.id === id);
-      const oldItem = arr[idx];
-      const newItem = { ...oldItem, [propName]: !oldItem[propName] };
-      return [...arr.slice(0, idx), newItem, ...arr.slice(idx + 1)];
-   };
+  const importantItem = (id) =>
+    setTodoData((prev) => toggleProperty(prev, id, 'important'));
 
-   doneItem = (id) => {
-      this.setState(({ todoData }) => {
-         return {
-            todoData: this.toggleProperty(todoData, id, "done"),
-         };
-      });
-   };
+  const deleteItem = (id) =>
+    setTodoData((prev) => prev.filter((el) => el.id !== id));
 
-   importantItem = (id) => {
-      this.setState(({ todoData }) => {
-         return {
-            todoData: this.toggleProperty(todoData, id, "important"),
-         };
-      });
-   };
+  const addItem = (text) => {
+    const newItem = createTodoItem(text);
+    setTodoData((prev) => [...prev, newItem]);
+  };
 
-   deleteItem = (id) => {
-      this.setState(({ todoData }) => {
-         const idx = todoData.findIndex((el) => el.id === id);
+  const search = (items, term) =>
+    term.length === 0
+      ? items
+      : items.filter((item) => {
+          return item.label.toLowerCase().indexOf(term.toLowerCase()) > -1;
+        });
 
-         const newArray = [
-            ...todoData.slice(0, idx),
-            ...todoData.slice(idx + 1),
-         ];
+  const onSearch = (term) => setTerm(term);
+  const onFilterChange = (filter) => setFilter(filter);
 
-         return {
-            todoData: newArray,
-         };
-      });
-   };
+  const changeFilter = (items, filter) => {
+    switch (filter) {
+      case 'all':
+        return items;
+      case 'active':
+        return items.filter((item) => !item.done);
+      case 'done':
+        return items.filter((item) => item.done);
+      default:
+        return items;
+    }
+  };
 
-   addItem = (text) => {
-      const newItem = this.createTodoItem(text);
-      this.setState(({ todoData }) => {
-         const newArr = [...todoData, newItem];
+  const visibleItems = changeFilter(search(todoData, term), filter);
+  const doneCount = todoData.filter((el) => el.done).length;
+  const todoCount = todoData.length - doneCount;
 
-         return {
-            todoData: newArr,
-         };
-      });
-   };
-
-   search(items, term) {
-      if (term.length === 0) {
-         return items;
-      }
-
-      return items.filter((item) => {
-         return item.label.toLowerCase().indexOf(term.toLowerCase()) > -1;
-      });
-   }
-
-   onSearch = (term) => this.setState({ term });
-   onFilterChange = (filter)=>this.setState({filter});
-
-   filter(items, filter) {
-      switch (filter) {
-         case "all":
-            return items;
-         case "active":
-            return items.filter((item) => !item.done);
-         case "done":
-            return items.filter((item) => item.done);
-         default:
-            return items;
-      }
-   }
-
-   render() {
-      const { todoData, term, filter } = this.state;
-      const visibleItems = this.filter(this.search(todoData, term), filter);
-      const doneCount = todoData.filter((el) => el.done).length;
-      const todoCount = todoData.length - doneCount;
-
-      return (
-         <div>
-            <AppHeader done={doneCount} todo={todoCount} />
-            <div className="top-panel d-flex">
-               <SearchPanel search={this.onSearch} />
-               <ItemStatusFilter
-                  filter={filter}
-                  onFilterChange={this.onFilterChange}
-               />
-            </div>
-            <TodoList
-               todos={visibleItems}
-               onDeleted={this.deleteItem}
-               importantItem={this.importantItem}
-               doneItem={this.doneItem}
-            />
-            <ItemAddForm onItemAdded={this.addItem} />
-         </div>
-      );
-   }
-}
+  return (
+    <div>
+      <AppHeader done={doneCount} todo={todoCount} />
+      <div className="top-panel d-flex">
+        <SearchPanel search={onSearch} />
+        <ItemStatusFilter filter={filter} onFilterChange={onFilterChange} />
+      </div>
+      <TodoList
+        todos={visibleItems}
+        onDeleted={deleteItem}
+        importantItem={importantItem}
+        doneItem={doneItem}
+      />
+      <ItemAddForm onItemAdded={addItem} />
+    </div>
+  );
+};
+export default App;

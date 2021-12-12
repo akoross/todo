@@ -1,37 +1,33 @@
-import React, { Component } from "react";
-import "./item-add-form.css";
+import React, { useState } from 'react';
+import './item-add-form.css';
 
-export default class ItemAddForm extends Component {
-   state = {
-      label: "",
-   };
+const ItemAddForm = ({ onItemAdded }) => {
+  const [label, setLabel] = useState('');
 
-   onLabelChange = (e) => {
-      this.setState({ label: e.target.value });
-   };
+  const onLabelChange = (e) => {
+    setLabel(e.target.value);
+  };
 
-   onSubmit = (e) => {
-      e.preventDefault();
-      this.props.onItemAdded(this.state.label);
-      this.setState({
-         label: "",
-      });
-   };
+  const onSubmit = (e) => {
+    e.preventDefault();
+    onItemAdded(label);
+    setLabel('');
+  };
 
-   render() {
-      return (
-         <form className="item-add-form d-flex" onSubmit={this.onSubmit}>
-            <input
-               type="text"
-               className="form-control"
-               onChange={this.onLabelChange}
-               placeholder="What needs to be done?"
-               value={this.state.label}
-            />
-            <button type="submit" className="btn btn-outline-info">
-               Add Item
-            </button>
-         </form>
-      );
-   }
-}
+  return (
+    <form className="item-add-form d-flex" onSubmit={onSubmit}>
+      <input
+        type="text"
+        value={label}
+        className="form-control"
+        onChange={onLabelChange}
+        placeholder="What needs to be done?"
+      />
+      <button type="submit" className="btn btn-outline-info">
+        Add Item
+      </button>
+    </form>
+  );
+};
+
+export default ItemAddForm;
