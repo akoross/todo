@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import './search-panel.css';
 
 const SearchPanel = ({ search }) => {
-  const [term, setTerm] = useState('');
+  const termRef = useRef(null);
 
-  const searchChange = (e) => {
-    setTerm(e.target.value);
-    search(term);
+  const searchChange = () => {
+    search(termRef.current.value);
   };
 
   return (
     <input
       className="search-input"
       placeholder="search"
-      value={term}
+      ref={termRef}
       onChange={searchChange}
     />
   );

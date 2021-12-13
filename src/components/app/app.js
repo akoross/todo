@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import AppHeader from '../app-header';
 import SearchPanel from '../search-panel';
 import ItemStatusFilter from '../item-status-filter';
 import TodoList from '../todo-list';
 import ItemAddForm from '../item-add-form';
-//134
+
 const App = () => {
   const [todoData, setTodoData] = useState([]);
   const [term, setTerm] = useState('');
   const [filter, setFilter] = useState('all');
+
+  const savedTodoData = (item) =>
+    JSON.parse(localStorage.getItem(item) || '[]');
+
+  useEffect(() => {
+    setTodoData(savedTodoData('todoData'));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('todoData', JSON.stringify(todoData));
+  }, [todoData]);
 
   const createTodoItem = (label) => {
     return {
